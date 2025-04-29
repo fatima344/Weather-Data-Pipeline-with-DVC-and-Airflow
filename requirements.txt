@@ -1,0 +1,6 @@
+requests
+pandas
+scikit-learn
+apache-airflow
+dvc
+dvc-gdrive
