@@ -8,7 +8,6 @@ def preprocess_and_save():
     
     # Check if there are any missing values, and handle them
     df = df.fillna(method="ffill")  # Simple forward-fill for demonstration
-    
     # Check if the columns exist before processing them (in case there's an issue with the data)
     if 'Temperature' in df.columns and 'Wind Speed' in df.columns:
         # Normalize Temperature and Wind Speed to the range [0, 1]
