@@ -23,12 +23,9 @@ dag = DAG(
     catchup=False,
 )
 
-# Get the directory of this DAG file
-dag_dir = os.path.dirname(os.path.abspath(__file__))
-
-# Go up one level from the DAGs folder to the project root
-# Adjust the number of parent directories as needed based on your structure
-project_path = os.path.abspath(os.path.join(dag_dir, '..', '..'))
+# Use the mounted path from the docker-compose file
+# This is the path inside the container where your project is mounted
+project_path = '/opt/project'
 
 # Define tasks using BashOperator
 fetch_task = BashOperator(
@@ -58,12 +55,10 @@ evaluate_task = BashOperator(
 dvc_version_task = BashOperator(
     task_id='version_with_dvc',
     bash_command=f'''
-    cd {project_path} && 
-    dvc add data/raw_data.csv && 
-    dvc add data/processed_data.csv && 
-    dvc add models/model.pkl && 
-    git add data/*.dvc models/*.dvc metrics.json .gitignore && 
-    git commit -m "Update data and model via Airflow" || echo "No changes to commit" && 
+    cd {project_path} &&
+    dvc repro &&
+    git add data/*.dvc models/*.dvc metrics.json .gitignore &&
+    git commit -m "Update data and model via Airflow" || echo "No changes to commit" &&
     dvc push || echo "DVC push failed, check authentication"
     ''',
     dag=dag,
