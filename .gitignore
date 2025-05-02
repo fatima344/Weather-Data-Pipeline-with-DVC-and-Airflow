@@ -1,2 +1,3 @@
 weather_env/
 src/dvc.json
+*.json
