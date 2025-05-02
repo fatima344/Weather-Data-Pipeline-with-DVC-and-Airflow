@@ -1,2 +1,4 @@
 /raw_data.csv
 /processed_data.csv
+/model.pkl
+weather_env/
