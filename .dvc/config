@@ -1,4 +1,6 @@
 [core]
-    remote = local_remote
-['remote "local_remote"']
-    url = C:/Users/asimf/OneDrive/Desktop/dvc
+    remote = gdrive_remote
+['remote "gdrive_remote"']
+    url = gdrive://1qIvgWtt3ZJ0cLFO9TTa5Iq0QCP0wQzjV
+    gdrive_use_service_account = true
+    gdrive_service_account_json_file_path = ../src/dvc.json

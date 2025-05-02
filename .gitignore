@@ -1,0 +1,6 @@
+weather_env/
+plugins/
+logs/
+config/
+src/dvc.json
+*.json

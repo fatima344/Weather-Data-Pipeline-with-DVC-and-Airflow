@@ -4,3 +4,4 @@ scikit-learn
 apache-airflow
 dvc
 dvc-gdrive
+requests

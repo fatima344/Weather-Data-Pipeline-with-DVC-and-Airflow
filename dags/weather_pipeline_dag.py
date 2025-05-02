@@ -1,35 +1,68 @@
-# dags/weather_pipeline_dag.py
+import os
+from datetime import datetime, timedelta
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from datetime import datetime
-from src.fetch_weather import fetch_and_save
-from src.preprocess_data import preprocess_and_save
-# Optional: from src.train_model import train_and_save
+from airflow.operators.bash import BashOperator
 
+# Define default arguments
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2025, 1, 1),
-    'retries': 1
+    'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
 }
 
-with DAG(dag_id='weather_data_pipeline',
-         default_args=default_args,
-         schedule_interval='@daily',
-         catchup=False) as dag:
+# Define the DAG
+dag = DAG(
+    'weather_data_pipeline',
+    default_args=default_args,
+    description='A DAG for collecting and processing weather data',
+    schedule_interval=timedelta(days=1),
+    start_date=datetime(2023, 1, 1),
+    catchup=False,
+)
 
-    collect_task = PythonOperator(
-        task_id='fetch_weather_data',
-        python_callable=fetch_and_save
-    )
-    preprocess_task = PythonOperator(
-        task_id='preprocess_data',
-        python_callable=preprocess_and_save
-    )
-    # You could also add a training task:
-    # train_task = PythonOperator(
-    #     task_id='train_model',
-    #     python_callable=train_and_save
-    # )
+# Use the mounted path from the docker-compose file
+# This is the path inside the container where your project is mounted
+project_path = '/opt/project'
 
-    collect_task >> preprocess_task
-    # preprocess_task >> train_task
+# Define tasks using BashOperator
+fetch_task = BashOperator(
+    task_id='fetch_weather_data',
+    bash_command=f'cd {project_path} && python src/fetch_weather.py',
+    dag=dag,
+)
+
+preprocess_task = BashOperator(
+    task_id='preprocess_data',
+    bash_command=f'cd {project_path} && python src/preprocess_data.py',
+    dag=dag,
+)
+
+train_task = BashOperator(
+    task_id='train_model',
+    bash_command=f'cd {project_path} && python src/train_model.py',
+    dag=dag,
+)
+
+evaluate_task = BashOperator(
+    task_id='evaluate_model',
+    bash_command=f'cd {project_path} && python src/generate_metrics.py',
+    dag=dag,
+)
+
+dvc_version_task = BashOperator(
+    task_id='version_with_dvc',
+    bash_command=f'''
+    cd {project_path} &&
+    dvc repro &&
+    git add data/*.dvc models/*.dvc metrics.json .gitignore &&
+    git commit -m "Update data and model via Airflow" || echo "No changes to commit" &&
+    dvc push || echo "DVC push failed, check authentication"
+    ''',
+    dag=dag,
+)
+
+# Define task dependencies
+fetch_task >> preprocess_task >> train_task >> evaluate_task >> dvc_version_task

@@ -25,7 +25,7 @@ def preprocess_and_save():
         
         # Save the processed data
         df.to_csv("data/processed_data.csv", index=False)
-        print("Processed data saved to data/processed/processed_data.csv")
+        print("Processed data saved to data/processed_data.csv")
     else:
         print("Error: 'Temperature' or 'Wind Speed' columns missing.")
 
