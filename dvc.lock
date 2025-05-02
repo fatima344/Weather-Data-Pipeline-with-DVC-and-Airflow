@@ -1,0 +1,78 @@
+schema: '2.0'
+stages:
+  fetch:
+    cmd: python src/fetch_weather.py
+    deps:
+    - path: src/fetch_weather.py
+      hash: md5
+      md5: 8f0553e3238c07402e77995cb0177fc1
+      size: 1408
+      isexec: true
+    outs:
+    - path: data/raw_data.csv
+      hash: md5
+      md5: e6386a658efbd700a218c7f52d20224d
+      size: 405
+      isexec: true
+  preprocess:
+    cmd: python src/preprocess_data.py
+    deps:
+    - path: data/raw_data.csv
+      hash: md5
+      md5: e6386a658efbd700a218c7f52d20224d
+      size: 405
+      isexec: true
+    - path: src/preprocess_data.py
+      hash: md5
+      md5: cda78bc0aa6d2b890317a89a48b1bef2
+      size: 1647
+      isexec: true
+    outs:
+    - path: data/processed_data.csv
+      hash: md5
+      md5: 34f6105c1e6e2209a24a919a7a9ed3ca
+      size: 389
+      isexec: true
+  train:
+    cmd: python src/train_model.py
+    deps:
+    - path: data/processed_data.csv
+      hash: md5
+      md5: 34f6105c1e6e2209a24a919a7a9ed3ca
+      size: 389
+      isexec: true
+    - path: src/train_model.py
+      hash: md5
+      md5: dd4c4a6ef4b122f51ea02d083ef8711b
+      size: 1486
+      isexec: true
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: b70485bb872cfdd76323c0a8f05b3cde
+      size: 905
+      isexec: true
+  evaluate:
+    cmd: python src/generate_metrics.py
+    deps:
+    - path: data/processed_data.csv
+      hash: md5
+      md5: 34f6105c1e6e2209a24a919a7a9ed3ca
+      size: 389
+      isexec: true
+    - path: models/model.pkl
+      hash: md5
+      md5: b70485bb872cfdd76323c0a8f05b3cde
+      size: 905
+      isexec: true
+    - path: src/generate_metrics.py
+      hash: md5
+      md5: 62d264f87fe3a05e448be1722c82d62e
+      size: 968
+      isexec: true
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: 83481d56deefee53eb82757fec741a4f
+      size: 112
+      isexec: true

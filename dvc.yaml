@@ -1,4 +1,4 @@
-# Updated dvc.yaml
+
 stages:
   fetch:
     cmd: python src/fetch_weather.py
